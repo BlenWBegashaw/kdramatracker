@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'search_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String username;
 
-  HomeScreen({required this.username});
+  const HomeScreen({super.key, required this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -13,20 +14,35 @@ class HomeScreen extends StatelessWidget {
         title: Text('Welcome, $username'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
             },
           )
         ],
       ),
       body: Center(
-        child: Text(
-          'This is your KDrama home screen!',
-          style: TextStyle(fontSize: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'This is your KDrama home screen!',
+              style: const TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              child: const Text('Search K-Dramas'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SearchScreen()),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
