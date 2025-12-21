@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/kdrama.dart';
 import '../services/api_service.dart';
+import '../models/kdrama.dart';
+import 'kdrama_detail.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -11,104 +12,55 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final ApiService apiService = ApiService();
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
+
   List<KDrama> _results = [];
   bool _isLoading = false;
 
-  void _search() async {
-    final query = _searchController.text.trim();
+  Future<void> _search() async {
+    final query = _controller.text.trim();
     if (query.isEmpty) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final dramas = await apiService.searchKDrama(query);
-      setState(() {
-        _results = dramas;
-      });
+      setState(() => _results = dramas);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching dramas: $e')),
+        SnackBar(content: Text('Error: $e')),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
-  }
-
-  void _showRatingDialog(KDrama drama) {
-    double? rating;
-    String? review;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(drama.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Your Rating (1-10)'),
-              onChanged: (val) => rating = double.tryParse(val),
-            ),
-            TextField(
-              decoration: const InputDecoration(labelText: 'Your Review'),
-              onChanged: (val) => review = val,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                drama.userRating = rating;
-                drama.userReview = review;
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search K-Dramas'),
-      ),
+      appBar: AppBar(title: const Text('Search K-Dramas')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Enter K-Drama name',
-                suffixIcon: IconButton(
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      labelText: 'Enter K-Drama name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: _search,
                 ),
-              ),
-              onSubmitted: (_) => _search(),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _isLoading
                 ? const CircularProgressIndicator()
                 : Expanded(
@@ -116,16 +68,50 @@ class _SearchScreenState extends State<SearchScreen> {
                       itemCount: _results.length,
                       itemBuilder: (context, index) {
                         final drama = _results[index];
+
                         return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 6),
                           child: ListTile(
                             leading: drama.imageUrl.isNotEmpty
-                                ? Image.network(drama.imageUrl, width: 50, fit: BoxFit.cover)
-                                : const SizedBox(width: 50),
-                            title: Text(drama.title),
-                            subtitle: drama.userRating != null
-                                ? Text('Your rating: ${drama.userRating} ⭐\n${drama.userReview ?? ""}')
-                                : null,
-                            onTap: () => _showRatingDialog(drama),
+                                ? Image.network(
+                                    drama.imageUrl,
+                                    width: 50,
+                                    fit: BoxFit.cover,
+                                  )
+                                : const Icon(Icons.tv, size: 40),
+                            title: Text(
+                              drama.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Text(
+                                  drama.description,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  drama.userRating != null
+                                      ? '⭐ Rating: ${drama.userRating}'
+                                      : '⭐ Rating: Not rated',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      KDramaDetailScreen(drama: drama),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },

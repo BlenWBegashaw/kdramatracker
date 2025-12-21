@@ -16,29 +16,32 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
+              // Navigate back to login screen
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
             },
-          )
+          ),
         ],
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'This is your KDrama home screen!',
-              style: const TextStyle(fontSize: 20),
+            const Text(
+              'Your KDrama Dashboard',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              child: const Text('Search K-Dramas'),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.search),
+              label: const Text('Search K-Dramas'),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const SearchScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const SearchScreen()),
                 );
               },
             ),

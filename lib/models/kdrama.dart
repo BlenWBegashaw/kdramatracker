@@ -2,6 +2,7 @@ class KDrama {
   final String title;
   final String description;
   final String imageUrl;
+  final double rating;
 
   double? userRating;
   String? userReview;
@@ -10,6 +11,7 @@ class KDrama {
     required this.title,
     required this.description,
     required this.imageUrl,
+    required this.rating,
     this.userRating,
     this.userReview,
   });
@@ -17,7 +19,8 @@ class KDrama {
   factory KDrama.fromJson(Map<String, dynamic> json) {
     return KDrama(
       title: json['name'] ?? '',
-      description: json['overview'] ?? '',
+      description: json['overview'] ?? 'No description available.',
+      rating: (json['vote_average'] ?? 0).toDouble(),
       imageUrl: json['poster_path'] != null
           ? 'https://image.tmdb.org/t/p/w500${json['poster_path']}'
           : '',
